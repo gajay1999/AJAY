@@ -1,0 +1,107 @@
+#GENERATING MINTERMS AND DON'T CARES
+
+def zeros(m):       #FUNCTION TO GENERATE A STRING OF 'm' ZEROS
+    a=''
+    for i in range(m):
+        a+='0'
+    return a
+
+def j_k_ff(p):      #FUNCTION TO GENERATE MINTERMS AND DON'T CARES OF J AND K
+        j_1=[]
+        j_d=[]
+        k_1=[]
+        k_d=[]
+        for i in range(p,m*n,m):
+            if ((q1_str[i]=='0') and (q2_str[i]=='0')):
+                k_d.append(int(q_t1[i//m],2))
+            if ((q1_str[i]=='0') and (q2_str[i]=='1')):
+                j_1.append(int(q_t1[i//m],2))
+                k_d.append(int(q_t1[i//m],2))
+            if ((q1_str[i]=='1') and (q2_str[i]=='0')):
+                j_d.append(int(q_t1[i//m],2))
+                k_1.append(int(q_t1[i//m],2))
+            if ((q1_str[i]=='1') and (q2_str[i]=='1')):
+                j_d.append(int(q_t1[i//m],2))
+        print("\nMinterms of J for Flip Flop",m-p,":",j_1)
+        print("Don't Care terms of J for Flip Flop",m-p,":",j_d)
+        print("\nMinterms of K for Flip Flop",m-p,":",k_1)
+        print("Don't Care terms of K for Flip Flop",m-p,":",k_d)
+
+def d_ff(p):        #FUNCTION TO GENERATE MINTERMS OF D
+        d=[]
+        for i in range(p,m*n,m):
+                if (q2_str[i]=='1'):
+                        d.append(int(q_t1[i//m],2))
+        print("\nMinterms of D for Flip Flop",m-p,":",d)
+        print(d)    
+
+def t_ff(p):        #FUNCTION TO GENERATE MINTERMS OF T
+        t=[]
+        for i in range(p,m*n,m):
+            if ((q1_str[i]=='0') and (q2_str[i]=='1')):
+                t.append(int(q_t1[i//m],2))
+            if ((q1_str[i]=='1') and (q2_str[i]=='0')):
+                t.append(int(q_t1[i//m],2))
+        print("\nMinterms of T for Flip Flop",m-p,":",t)
+        print(t)
+
+print("CHOOSE THE TYPE OF COUNTER \n\
+1. SYNCHRONOUS COUNTER\n\
+2. ASYNCHRONOUS COUNTER")
+i1=eval(input("(ENTER EITHER 1 OR 2):"))
+
+print("\nCHOOSE THE FLIP FLOP TO BE USED:\n\
+1. JK FLIP FLOP\n\
+2. D FLIP FLOP\n\
+3. T FLIP FLOP")
+i2=eval(input("(ENTER EITHER 1 OR 2 OR 3):"))
+
+seq_int=list(eval(input("\nENTER THE SEQUENCE OF THE COUNTER:")))
+n=len(seq_int)
+m=len(str(bin(max(seq_int)).replace("0b","")))
+
+print("\nNUMBER OF ELEMENTS IN THE SEQUENCE:",n)
+print("\nNUMBER OF FLIPFLOPS REQUIRED:",m)
+
+q_t1=[]
+for i in range(0,n):
+    a=str(bin(seq_int[i]).replace("0b",""))
+    a=zeros(m-len(a))+a
+    q_t1.append(a)
+print("\nPRESENT STATES (Q(t)):",q_t1)
+q1_str=""
+for i in range(0,n):
+    q1_str+=q_t1[i]
+
+q_t2=[]
+q_t2=q_t1[1:]+q_t1[0:1]
+print("\nNEXT STATES (Q(t+1)):",q_t2)
+q2_str=""
+for i in range(0,n):
+    q2_str+=q_t2[i]
+
+
+if (i1==1):       #SYNCHRONOUS DESIGN
+        if (i2==1):       #JK FLIP FLOP
+                for i in range(m-1,-1,-1):
+                        j_k_ff(i)
+
+        if (i2==2):     #D FLIP FLOP
+                for i in range(m-1,-1,-1):
+                        d_ff(i)
+        if (i2==3):     #T FLIP FLOP
+                for i in range(m-1,-1,-1):
+                        t_ff(i)
+                        
+if (i1==2):       #ASYNCHRONOUS DESIGN
+        if (i2==1):       #JK FLIP FLOP
+                for i in range(m-1,-1,-1):
+                        j_k_ff(i)
+
+        if (i2==2):     #D FLIP FLOP
+                for i in range(m-1,-1,-1):
+                        d_ff(i)
+        if (i2==3):     #T FLIP FLOP
+                for i in range(m-1,-1,-1):
+                        t_ff(i)                
+        
