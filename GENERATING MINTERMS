@@ -1,69 +1,99 @@
+#DESIGN OF SYNCHRONOUS COUNTERS 
 #GENERATING MINTERMS AND DON'T CARES
+#BY AJAY & KAVIN
 
-def zeros(m):       #FUNCTION TO GENERATE A STRING OF 'm' ZEROS
+def zeros(m):           #GENERATES 'm' ZEROS
     a=''
     for i in range(m):
         a+='0'
     return a
 
-def j_k_ff(p):      #FUNCTION TO GENERATE MINTERMS AND DON'T CARES OF J AND K
+def j_k_ff(p):          #DESIGN USING JK FLIP FLOP
+        j_0=[]
         j_1=[]
         j_d=[]
+        k_0=[]
         k_1=[]
         k_d=[]
         for i in range(p,m*n,m):
             if ((q1_str[i]=='0') and (q2_str[i]=='0')):
+                j_0.append(int(q_t1[i//m],2))
                 k_d.append(int(q_t1[i//m],2))
-            if ((q1_str[i]=='0') and (q2_str[i]=='1')):
+            elif ((q1_str[i]=='0') and (q2_str[i]=='1')):
                 j_1.append(int(q_t1[i//m],2))
                 k_d.append(int(q_t1[i//m],2))
-            if ((q1_str[i]=='1') and (q2_str[i]=='0')):
+            elif ((q1_str[i]=='1') and (q2_str[i]=='0')):
                 j_d.append(int(q_t1[i//m],2))
                 k_1.append(int(q_t1[i//m],2))
-            if ((q1_str[i]=='1') and (q2_str[i]=='1')):
+            else:
                 j_d.append(int(q_t1[i//m],2))
-        print("\nMinterms of J for Flip Flop",m-p,":",j_1)
-        print("Don't Care terms of J for Flip Flop",m-p,":",j_d)
-        print("\nMinterms of K for Flip Flop",m-p,":",k_1)
-        print("Don't Care terms of K for Flip Flop",m-p,":",k_d)
+                k_0.append(int(q_t1[i//m],2))
+        for i in all_states:
+                if (i not in (j_0+j_1+j_d)):
+                        j_d.append(i)
+                        k_d.append(i)
+        print("\nFlip Flop",m-p,":")
+        print("\nZero terms of J :",j_0)
+        print("Minterms of J :",j_1)
+        print("Don't Care terms of J :",j_d)
+        
+        print("\nZero terms of K :",k_0)
+        print("Minterms of K :",k_1)
+        print("Don't Care terms of K :",k_d)
 
-def d_ff(p):        #FUNCTION TO GENERATE MINTERMS OF D
-        d=[]
+def d_ff(p):            #DESIGN USING D FLIP FLOP
+        d_0=[]
+        d_1=[]
+        d_d=[]
         for i in range(p,m*n,m):
                 if (q2_str[i]=='1'):
-                        d.append(int(q_t1[i//m],2))
-        print("\nMinterms of D for Flip Flop",m-p,":",d)
-        print(d)    
-
-def t_ff(p):        #FUNCTION TO GENERATE MINTERMS OF T
-        t=[]
+                        d_1.append(int(q_t1[i//m],2))
+                else:
+                        d_0.append(int(q_t1[i//m],2))
+        for i in all_states:
+                if (i not in (d_0+d_1)):
+                        d_d.append(i)
+        print("\nFlip Flop",m-p,":")
+        print("\nZero terms of D :",d_0)
+        print("Minterms of D :",d_1)
+        print("Don't Care terms of D :",d_d)
+        
+def t_ff(p):            #DESIGN USING T FLIP FLOP
+        t_0=[]
+        t_1=[]
+        t_d=[]
         for i in range(p,m*n,m):
-            if ((q1_str[i]=='0') and (q2_str[i]=='1')):
-                t.append(int(q_t1[i//m],2))
-            if ((q1_str[i]=='1') and (q2_str[i]=='0')):
-                t.append(int(q_t1[i//m],2))
-        print("\nMinterms of T for Flip Flop",m-p,":",t)
-        print(t)
-
-print("CHOOSE THE TYPE OF COUNTER \n\
-1. SYNCHRONOUS COUNTER\n\
-2. ASYNCHRONOUS COUNTER")
-i1=eval(input("(ENTER EITHER 1 OR 2):"))
-
-print("\nCHOOSE THE FLIP FLOP TO BE USED:\n\
+            if (q1_str[i]!= q2_str[i]):
+                t_1.append(int(q_t1[i//m],2))
+            else:
+                t_0.append(int(q_t1[i//m],2))
+        for i in all_states:
+                if (i not in (t_0+t_1)):
+                        t_d.append(i)
+        print("\nFlip Flop",m-p,":")
+        print("\nZero terms of T :",t_0)
+        print("Minterms of T :",t_1)
+        print("Don't Care terms of T :",t_d)
+    
+FF=0
+while(FF!=1 and FF!=2 and FF!=3):               #CHOOSING THE FLIP FLOP
+        print("CHOOSE THE FLIP FLOP TO BE USED:\n\
 1. JK FLIP FLOP\n\
 2. D FLIP FLOP\n\
 3. T FLIP FLOP")
-i2=eval(input("(ENTER EITHER 1 OR 2 OR 3):"))
-
+        FF=eval(input("(ENTER EITHER 1 OR 2 OR 3):"))
+        if(FF!=1 and FF!=2 and FF!=3):
+                print("PLEASE ENTER A VALID INPUT")
+                
+print("\nTHE MAXIMUM ALLOWED STATE IS 15")
 seq_int=list(eval(input("\nENTER THE SEQUENCE OF THE COUNTER:")))
 n=len(seq_int)
 m=len(str(bin(max(seq_int)).replace("0b","")))
 
 print("\nNUMBER OF ELEMENTS IN THE SEQUENCE:",n)
-print("\nNUMBER OF FLIPFLOPS REQUIRED:",m)
+print("\nNUMBER OF FLIPFLOPS REQUIRED:",m)                                        
 
-q_t1=[]
+q_t1=[]         #ASSIGNING THE PRESENT STATES
 for i in range(0,n):
     a=str(bin(seq_int[i]).replace("0b",""))
     a=zeros(m-len(a))+a
@@ -73,35 +103,31 @@ q1_str=""
 for i in range(0,n):
     q1_str+=q_t1[i]
 
-q_t2=[]
+q_t2=[]         #ASSIGNING THE NEXT STATES
 q_t2=q_t1[1:]+q_t1[0:1]
 print("\nNEXT STATES (Q(t+1)):",q_t2)
 q2_str=""
 for i in range(0,n):
     q2_str+=q_t2[i]
 
+if (m==1):      #GENERATING LIST OF ALL STATES
+        all_states=[0,1]
+elif (m==2):
+        all_states=[0,1,2,3]
+elif (m==3):
+        all_states=[0,1,2,3,4,5,6,7]
+elif (m==4):
+        all_states=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+else:
+        print("The number of states exceeds the limit")
 
-if (i1==1):       #SYNCHRONOUS DESIGN
-        if (i2==1):       #JK FLIP FLOP
-                for i in range(m-1,-1,-1):
-                        j_k_ff(i)
+if (FF==1):     #JK FLIP FLOP
+        for i in range(m-1,-1,-1):
+                j_k_ff(i)
 
-        if (i2==2):     #D FLIP FLOP
-                for i in range(m-1,-1,-1):
-                        d_ff(i)
-        if (i2==3):     #T FLIP FLOP
-                for i in range(m-1,-1,-1):
-                        t_ff(i)
-                        
-if (i1==2):       #ASYNCHRONOUS DESIGN
-        if (i2==1):       #JK FLIP FLOP
-                for i in range(m-1,-1,-1):
-                        j_k_ff(i)
-
-        if (i2==2):     #D FLIP FLOP
-                for i in range(m-1,-1,-1):
-                        d_ff(i)
-        if (i2==3):     #T FLIP FLOP
-                for i in range(m-1,-1,-1):
-                        t_ff(i)                
-        
+elif (FF==2):     #D FLIP FLOP
+        for i in range(m-1,-1,-1):
+                d_ff(i)
+else:     #T FLIP FLOP
+        for i in range(m-1,-1,-1):
+                t_ff(i)   
