@@ -1,21 +1,124 @@
-# K-Map Minimization
+#DESIGN OF SYNCHRONOUS COUNTERS
+#DONE BY - AJAY G(2017105002) & KAVIN RAJ L R(2017105546)
 
-def minFunc(numVar, stringIn):
+"""
+AIM: To derive the logical expressions for the inputs to the flip-flops(JK or D or T)
+     in a synchronous counter.
+
+DESCRIPTION: Given the type of flip-flop to be used and the sequence in which the
+             synchronous counter should count, the program displays the logical
+             expression(s) for the input(s) to each of the flip-flops by using the
+             state transition table which makes use of the excitation table and the
+             simplication of boolean expression using Quine McCluskey Algorithm.
+
+NOTE: The maximum value that can be counted as a state is 15 i.e., the maximum number of
+      flip-flops(bits) is 4. The flip-flop displayed first corresponds to the LSB and the
+      flip-flop displayed last corresponds to the MSB.
+      The variables for the number of bits are indicated as follows:
+      (leftmost=MSB;rightmost=LSB)
+      2 Bits - AB
+      3 Bits - ABC
+      4 Bits - ABCD
+"""
+
+def zeros(m):           #GENERATES 'm' ZEROS
+    a=''
+    for i in range(m):
+        a+='0'
+    return a
+
+def ABCD(str_f):        #RETURNS THE MINTERMS TO BE PRINTED
+        str_f1=""
+        str_f2=""
+        if(str_f=="" or str_f=="+" or str_f=="++" or str_f=="+++"):
+            return('1')
+        if(str_f[0]=="+" and (str_f[1]=="w" or str_f[1]=="x" or str_f[1]=="y" or str_f[1]=="z")):
+            str_f1=str_f[1:]
+        else:
+            str_f1=str_f
+        for i in range(0,len(str_f1)):
+            if(str_f1[i]=='w'):
+                str_f2+='A'
+            elif(str_f1[i]=='x'):
+                str_f2+='B'
+            elif(str_f1[i]=='y'):
+                str_f2+='C'
+            elif(str_f1[i]=='z'):
+                str_f2+='D'
+            else:
+                str_f2+=str_f1[i]
+        return(str_f2)
+    
+def j_k_ff(p):          #DESIGN USING JK FLIP FLOP
+        j_0=[]
+        j_1=[]
+        j_d=[]
+        k_0=[]
+        k_1=[]
+        k_d=[]
+        for i in range(p,m*n,m):
+            if ((q1_str[i]=='0') and (q2_str[i]=='0')):
+                j_0.append(int(q_t1[i//m],2))
+                k_d.append(int(q_t1[i//m],2))
+            elif ((q1_str[i]=='0') and (q2_str[i]=='1')):
+                j_1.append(int(q_t1[i//m],2))
+                k_d.append(int(q_t1[i//m],2))
+            elif ((q1_str[i]=='1') and (q2_str[i]=='0')):
+                j_d.append(int(q_t1[i//m],2))
+                k_1.append(int(q_t1[i//m],2))
+            else:
+                j_d.append(int(q_t1[i//m],2))
+                k_0.append(int(q_t1[i//m],2))
+        for i in all_states:
+                if (i not in (j_0+j_1+j_d)):
+                        j_d.append(i)
+                        k_d.append(i)
+        print("\nFlip Flop",m-p,":")
+        j_f=minFunc(m,'('+str(j_1)+')d('+str(j_d)+')')
+        k_f=minFunc(m,'('+str(k_1)+')d('+str(k_d)+')')
+        print("\nj =",ABCD(j_f))
+        print("k =",ABCD(k_f))
+
+def d_ff(p):            #DESIGN USING D FLIP FLOP
+        d_0=[]
+        d_1=[]
+        d_d=[]
+        for i in range(p,m*n,m):
+                if (q2_str[i]=='1'):
+                        d_1.append(int(q_t1[i//m],2))
+                else:
+                        d_0.append(int(q_t1[i//m],2))
+        for i in all_states:
+                if (i not in (d_0+d_1)):
+                        d_d.append(i)
+        print("\nFlip Flop",m-p,":")
+        d_f=minFunc(m,'('+str(d_1)+')d('+str(d_d)+')')
+        print("\nd =",ABCD(d_f))
+
+def t_ff(p):            #DESIGN USING T FLIP FLOP
+        t_0=[]
+        t_1=[]
+        t_d=[]
+        for i in range(p,m*n,m):
+            if (q1_str[i]!= q2_str[i]):
+                t_1.append(int(q_t1[i//m],2))
+            else:
+                t_0.append(int(q_t1[i//m],2))
+        for i in all_states:
+                if (i not in (t_0+t_1)):
+                        t_d.append(i)
+        print("\nFlip Flop",m-p,":")
+        t_f=minFunc(m,'('+str(t_1)+')d('+str(t_d)+')')
+        print("\nt =",ABCD(t_f))
+
+
+def minFunc(numVar, stringIn):      # K-Map Minimization
 	num= int(numVar)
 	x= stringIn
-	"""
-    This python function takes function of maximum of 4 variables
-    as input and gives the corresponding minimized function(s)
-    as the output (minimized using the K-Map methodology),
-    considering the case of Don’t Care conditions.
-	Input is a string of the format (a0,a1,a2, ...,an) d(d0,d1, ...,dm)
-	Output is a string representing the simplified Boolean Expression in
-	SOP form.
-	"""
 	l= []
 	i=0
 	while(x[i]!='d'):
-		if(x[i].isdigit()==True):                         # taking the values from the input, and storing it in a list
+		if(x[i].isdigit()==True):                       # taking the values from the input, and storing it in a list
 			if(x[i+1].isdigit()==False):
 				l.append(x[i])
 				i+=1
@@ -29,7 +132,7 @@ def minFunc(numVar, stringIn):
 	if(x[y+1]!='-'):
 		while(x[y]!=')'):
 			if(x[y].isdigit()==True):
-				if(x[y+1].isdigit()==False):                #storing the dont care condition giving in the input
+				if(x[y+1].isdigit()==False):    #storing the dont care condition giving in the input
 					l.append(x[y])
 					y+=1
 				else:
@@ -38,16 +141,16 @@ def minFunc(numVar, stringIn):
 			else:
 				y+=1
 	if(num==4):
-		for i in range(len(l)):								#converting to binary for 4 variables
+		for i in range(len(l)):				#converting to binary for 4 variables
 			l[i] = format(int(l[i]), '04b')
 	elif(num==3):
-		for i in range(len(l)):								#converting to binary for 3 variables
+		for i in range(len(l)):		         	#converting to binary for 3 variables
 			l[i] = format(int(l[i]), '03b')
 	elif(num==2):
-		for i in range(len(l)):								#converting to binary for 2 variables
+		for i in range(len(l)):				#converting to binary for 2 variables
 			l[i] = format(int(l[i]), '02b')
 
-	a,b,c,d,e,f,g,h,p,q,w,r,t,y,m,n,o,z,u,v = [],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]  	#creating list to be stored
+	a,b,c,d,e,f,g,h,p,q,w,r,t,y,m,n,o,z,u,v = [],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]  	
 	l.sort()
 	count = 0
 	t=0
@@ -60,7 +163,7 @@ def minFunc(numVar, stringIn):
 					count+=1
 			if(count==0):
 				a.append(l[i])
-			if(count==1):						#appending into one of the list created above for seperation
+			if(count==1):					#appending into one of the list created above for seperation
 				b.append(l[i])
 			if(count==2):
 				c.append(l[i])
@@ -70,21 +173,21 @@ def minFunc(numVar, stringIn):
 				e.append(l[i])
 			count=0
 
-	def step1(a,b,f):  									# Proceding tp step 1 comparing a and b then follows on uptil all thrr couples are compared 
+	def step1(a,b,f):  						# Proceding tp step 1 comparing a and b then follows on uptil all thrr couples are compared 
 		count=0
 		for i in range(len(a)):
-			for k in range(len(b)): 					#loops
+			for k in range(len(b)): 		    
 				for j in range(num):
 					if(a[i][j]!=b[k][j]):
 						count+=1
 				if(count==1):
 					for j in range(num):
 						if(a[i][j]!=b[k][j]):
-							f.append(str(str(a[i][:j])+'x'+str(a[i][j+1:])+',('+str(int(a[i],2))+','+str(int(b[k],2))+')')) 	#slicing and appending
+							f.append(str(str(a[i][:j])+'x'+str(a[i][j+1:])+',('+str(int(a[i],2))+','+str(int(b[k],2))+')'))    
 				count=0
 		return(f)
 
-	f=step1(a,b,f)					#calling the function and storing what it returns
+	f=step1(a,b,f)					
 	g=step1(b,c,g)
 	h=step1(c,d,h)
 	p=step1(d,e,p)
@@ -94,16 +197,16 @@ def minFunc(numVar, stringIn):
 		for i in range(len(f)): 		#same as step 1 , step 2 does the same on the output of step 1 and give us a compariable impicants
 			for k in range(len(g)):
 				for j in range(num):
-					if(f[i][j]!=g[k][j]):			#loops
+					if(f[i][j]!=g[k][j]):			
 						count+=1
 				if(count==1):
 					for j in range(num):
 						if(f[i][j]!=g[k][j]):
-							q.append(str(str(f[i][:j])+'x'+str(f[i][j+1:-1])+','+ str(g[k][num+2:])))   #slicing and appending
+							q.append(str(str(f[i][:j])+'x'+str(f[i][j+1:-1])+','+ str(g[k][num+2:])))   
 				count=0
 		return(q)
 
-	q = step2(f,g,q)                  #calling the function and storing what it returns
+	q = step2(f,g,q)                                
 	w = step2(g,h,w)
 	r = step2(h,p,r)
 
@@ -113,31 +216,31 @@ def minFunc(numVar, stringIn):
 			for k in range(len(g)):
 				for j in range(num):
 					if(f[i][j]!=g[k][j]):
-						count+=1				#loops
+						count+=1				
 				if(count==1):
 					for j in range(num):
 						if(f[i][j]!=g[k][j]):
-							q.append(str(str(f[i][:j])+'x'+str(f[i][j+1:-1])+ ',' +str(g[k][6:]))) 				#slicing and appending
+							q.append(str(str(f[i][:j])+'x'+str(f[i][j+1:-1])+ ',' +str(g[k][6:]))) 		
 				count=0
 		return(q)
-	m = step3(q,w,m)			#calling the function and storing what it returns
+	m = step3(q,w,m)			                
 	n = step3(w,r,n)
 
 	def step4(f,g,p):
 		count=0
-		for i in range(len(f)):				#same as step 3 , step 4 does the same on the output of step 3 and give us a compariable impicants
+		for i in range(len(f)):			#same as step 3 , step 4 does the same on the output of step 3 and give us a compariable impicants
 			for k in range(len(g)):
 				for j in range(num):
-					if(f[i][j]=='x'):			#loops
+					if(f[i][j]=='x'):			
 						if(g[k][j]=='x'):
 							count+=1
 				if(count==2):
 					for j in range(num):
 						if(f[i][j]!=g[k][j]):
-							p.append(str(str(f[i][:j])+'x'+str(f[i][j+1:-1])+ str(g[k][-4:])))  #slicing and appending
+							p.append(str(str(f[i][:j])+'x'+str(f[i][j+1:-1])+ str(g[k][-4:])))  
 				count=0
-		return(p)				#return 
-	o = step4(m,n,o)			#fuction calling
+		return(p)				
+	o = step4(m,n,o)		    
 
 	z=list(o)
 	if(len(z)==0):
@@ -159,19 +262,19 @@ def minFunc(numVar, stringIn):
 		z.extend(d)
 		z.extend(e)
 
-	def concatinate(q):							#concatinating the list of unneccesary repeatation of the implicants
+	def concatinate(q):				#concatinating the list of unneccesary repeatation of the implicants
 		for i in range(len(q)):
 			for k in range(1+i,len(q)):
 				if(q[i][:num]==q[k][:num]):
 					q[k] = ''
 		while '' in q:
 			q.remove('')
-		return(q)					#return
+		return(q)					
 
 	z = concatinate(z)  
 
-	if ")" in z[0]:			#function call
-		def left(q):											#getting whats left in quine method of table and storing it in another list
+	if ")" in z[0]:		
+		def left(q):				#getting whats left in quine method of table and storing it in another list
 			for i in range(len(q)):
 				j=num+1
 				while(q[i][j]!=')'):
@@ -184,31 +287,31 @@ def minFunc(numVar, stringIn):
 							j+=2
 					else:
 						j+=1
-			return(u)						#return
-		u=left(z)								#fucntion call
+			return(u)						
+		u=left(z)								
 
-		def simple(u):												#removing repeated entries
+		def simple(u):				#removing repeated entries
 			for i in range (len(u)):
 				for k in range(i+1,len(u)):
 					if(u[i]==u[k]):
 						u[k]=''
 			while '' in u:
 				u.remove('')
-			return(u)			#return
-		u=simple(u)					#function call
+			return(u)			
+		u=simple(u)					
 
 
-	# Further code deals with the dont care conditions and isnt neccssary if you want to simplify it further it adds up to beauty.
+	# Further code deals with the dont care conditions 
 
 		def dcare(f,u,v):
 			count=0
 			for i in range(len(f)):
-				j=5													#to find out whats left, for loop run all over
+				j=5		        #to find out whats left, for loop run all over
 				while(f[i][j]!=')'):
 					if(f[i][j].isdigit()==True):
 						if(f[i][j+1].isdigit()==False):
 							if(f[i][j] not in u):
-								count+=1							#loops
+								count+=1							
 								u.append(f[i][j])
 							j+=1
 						else:
@@ -216,7 +319,7 @@ def minFunc(numVar, stringIn):
 								count+=1
 								u.append(f[i][j]+f[i][j+1])
 							j+=2
-					else:												#else condition
+					else:												
 						j+=1
 				if(count>=1):
 					v.append(f[i])
@@ -225,7 +328,7 @@ def minFunc(numVar, stringIn):
 
 		def acare(a,b,c,d,e,v):
 			if(len(a)==0 and len(c)==0):
-				v.extend(b)															#checking the left over in the very first seperation table
+				v.extend(b)	        #checking the left over in the very first seperation table
 			if(len(b)==0 and len(d)==0):
 				v.extend(c)
 			if(len(c)==0 and len(e)==0):
@@ -233,12 +336,12 @@ def minFunc(numVar, stringIn):
 			if(len(d)==0):
 				v.extend(e)
 			for i in range(len(v)):
-				v[i]=str(int(v[i],2))							#converting to decimal in returning the value
+				v[i]=str(int(v[i],2))	#converting to decimal in returning the value
 			return(v)
 		v=acare(a,b,c,d,e,v)
 		v,u=dcare(n,u,v)
 		v,u=dcare(m,u,v)
-		v,u=dcare(r,u,v)					#checking each step of the quine table for left over elements
+		v,u=dcare(r,u,v)			#checking each step of the quine table for left over elements
 		v,u=dcare(w,u,v)
 		v,u=dcare(q,u,v)
 		v,u=dcare(p,u,v)
@@ -248,7 +351,7 @@ def minFunc(numVar, stringIn):
 		v=concatinate(v)
 
 		z.extend(v)	
-					#storing all implicants including dont care in the same list
+                                                        #storing all implicants including dont care in the same list
 		def order(z):
 			for i in range(len(z)):
 				count=0
@@ -307,18 +410,18 @@ def minFunc(numVar, stringIn):
 		if(num==4):
 			dir = {0:'abcd',1:'abcz',2:'abyd',3:'abyz',4:'axcd',5:'axcz',6:'axyd',7:'axyz',8:'wbcd',9:'wbcz',10:'wbyd',11:'wbyz',12:'wxcd',13:'wxcz',14:'wxyd',15:'wxyz'}
 		elif(num==3):
-			dir = {0:'abc',1:'aby',2: 'axc',3:'axy',4:'wbc',5:'wby',6:'wxc',7:'wxy'}		#Dictionary
+			dir = {0:'abc',1:'aby',2: 'axc',3:'axy',4:'wbc',5:'wby',6:'wxc',7:'wxy'}		
 		elif(num==2):
 			dir = {0:'ab',1:'ax',2: 'wb',3:'wx'}
 		f=''
 		if ')' in z[0]:
 			for i in range(len(z)):
-				s=[]								#loops
+				s=[]								
 				j=num+1
 				while(z[i][j]!=')'):
 					if(z[i][j].isdigit()==True):
 						if(z[i][j+1].isdigit()==False):
-							s.append(dir[int(z[i][j])])				#string appending
+							s.append(dir[int(z[i][j])])				
 							j+=1
 						else:
 							s.append(dir[int(z[i][j]+z[i][j+1])])
@@ -328,7 +431,7 @@ def minFunc(numVar, stringIn):
 				for j in range(num):
 					count=0
 					for k in range(0,len(s)-1):
-						if(s[k][j]==s[k+1][j]):				#adding up the variable to create expression 
+						if(s[k][j]==s[k+1][j]):				
 							count+=1
 					if(count==(len(s)-1)):
 						if(s[k][j]=='a'):
@@ -366,95 +469,15 @@ def minFunc(numVar, stringIn):
 					else:
 						f=f+s[i][j]
 				if(i!=(len(z)-1)):
-					f=f+'+'					#SOP operator
+					f=f+'+'		    #SOP operator
 		return(f)
-	stringOut=exp(z)		#storing
-	return (stringOut)    	#returning the K map value back
-
-#DESIGN OF SYNCHRONOUS COUNTERS 
-#GENERATING MINTERMS AND DON'T CARES
+	stringOut=exp(z)		
+	return (stringOut)    	                            #returning the K map value back
  
-
-def zeros(m):           #GENERATES 'm' ZEROS
-    a=''
-    for i in range(m):
-        a+='0'
-    return a
-
-def j_k_ff(p):          #DESIGN USING JK FLIP FLOP
-        j_0=[]
-        j_1=[]
-        j_d=[]
-        k_0=[]
-        k_1=[]
-        k_d=[]
-        for i in range(p,m*n,m):
-            if ((q1_str[i]=='0') and (q2_str[i]=='0')):
-                j_0.append(int(q_t1[i//m],2))
-                k_d.append(int(q_t1[i//m],2))
-            elif ((q1_str[i]=='0') and (q2_str[i]=='1')):
-                j_1.append(int(q_t1[i//m],2))
-                k_d.append(int(q_t1[i//m],2))
-            elif ((q1_str[i]=='1') and (q2_str[i]=='0')):
-                j_d.append(int(q_t1[i//m],2))
-                k_1.append(int(q_t1[i//m],2))
-            else:
-                j_d.append(int(q_t1[i//m],2))
-                k_0.append(int(q_t1[i//m],2))
-        for i in all_states:
-                if (i not in (j_0+j_1+j_d)):
-                        j_d.append(i)
-                        k_d.append(i)
-        print("\nFlip Flop",m-p,":")
-        print("\nZero terms of J :",j_0)
-        print("Minterms of J :",j_1)
-        print("Don't Care terms of J :",j_d)
-        
-        print("\nZero terms of K :",k_0)
-        print("Minterms of K :",k_1)
-        print("Don't Care terms of K :",k_d)
-
-        print("\nj =",minFunc(m,'('+str(j_1)+')d('+str(j_d)+')'))
-        print("k =",minFunc(m,'('+str(k_1)+')d('+str(k_d)+')'))
-
-def d_ff(p):            #DESIGN USING D FLIP FLOP
-        d_0=[]
-        d_1=[]
-        d_d=[]
-        for i in range(p,m*n,m):
-                if (q2_str[i]=='1'):
-                        d_1.append(int(q_t1[i//m],2))
-                else:
-                        d_0.append(int(q_t1[i//m],2))
-        for i in all_states:
-                if (i not in (d_0+d_1)):
-                        d_d.append(i)
-        print("\nFlip Flop",m-p,":")
-        print("\nZero terms of D :",d_0)
-        print("Minterms of D :",d_1)
-        print("Don't Care terms of D :",d_d)
-        print("\nd =",minFunc(m,'('+str(d_1)+')d('+str(d_d)+')'))
-
-def t_ff(p):            #DESIGN USING T FLIP FLOP
-        t_0=[]
-        t_1=[]
-        t_d=[]
-        for i in range(p,m*n,m):
-            if (q1_str[i]!= q2_str[i]):
-                t_1.append(int(q_t1[i//m],2))
-            else:
-                t_0.append(int(q_t1[i//m],2))
-        for i in all_states:
-                if (i not in (t_0+t_1)):
-                        t_d.append(i)
-        print("\nFlip Flop",m-p,":")
-        print("\nZero terms of T :",t_0)
-        print("Minterms of T :",t_1)
-        print("Don't Care terms of T :",t_d)
-        print("\nt =",minFunc(m,'('+str(t_1)+')d('+str(t_d)+')'))
-
+#PROGRAM EXECUTION STARTS HERE
+    
 FF=0
-while(FF!=1 and FF!=2 and FF!=3):               #CHOOSING THE FLIP FLOP
+while(FF!=1 and FF!=2 and FF!=3):                           #CHOOSING THE FLIP FLOP
         print("CHOOSE THE FLIP FLOP TO BE USED:\n\
 1. JK FLIP FLOP\n\
 2. D FLIP FLOP\n\
@@ -503,9 +526,11 @@ if (FF==1):     #JK FLIP FLOP
         for i in range(m-1,-1,-1):
                 j_k_ff(i)
 
-elif (FF==2):     #D FLIP FLOP
+elif (FF==2):   #D FLIP FLOP
         for i in range(m-1,-1,-1):
                 d_ff(i)
-else:     #T FLIP FLOP
+else:           #T FLIP FLOP
         for i in range(m-1,-1,-1):
-                t_ff(i)                
+                t_ff(i)
+
+#END
